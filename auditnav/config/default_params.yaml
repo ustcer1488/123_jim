@@ -1,0 +1,149 @@
+# =============================================================================
+# AuditNav — Centralised Parameter File
+# All nodes load this file at startup via load_config() in config_loader.py.
+# To override a parameter, either edit this file or pass --config /path/to/file
+# when launching a node individually.
+# =============================================================================
+
+# ---------------------------------------------------------------------------
+# Data / Paths
+# ---------------------------------------------------------------------------
+data:
+  base_dir: "data"                     # All runtime outputs go here (relative to CWD)
+  calib_file: "map_calibration.json"   # Pixel↔world calibration (place in CWD before launch)
+  embed_model_path: "./bge-m3"         # Local path to downloaded BGE-M3 model
+
+# ---------------------------------------------------------------------------
+# API  (key is read from env var SILICONFLOW_API_KEY — never put key here)
+# ---------------------------------------------------------------------------
+api:
+  url:   "https://api.siliconflow.cn/v1/chat/completions"
+  vlm_model:  "Qwen/Qwen3-VL-235B-A22B-Instruct"   # Used by semantic_memory_node
+  llm_model:  "Qwen/Qwen2.5-72B-Instruct"           # Used by instruction_parser_node
+  timeout_sec: 60
+  vlm_timeout_sec: 240
+
+# ---------------------------------------------------------------------------
+# ROS 2 Topics
+# ---------------------------------------------------------------------------
+topics:
+  # Sensor inputs
+  lidar:          "/point_cloud"
+  rgb_image:      "/camera/rgb/image_raw"
+  depth_image:    "/camera/depth/image_raw"
+  camera_info:    "/camera_info"
+  odom:           "/odom"
+  # Maps
+  map:            "/map"
+  local_map:      "/local_map"
+  # Control output
+  cmd_vel:        "/cmd_vel"
+  # AuditNav interface
+  instruction:    "/audit_nav/instruction"
+  result:         "/audit_nav/result"
+  feedback:       "/audit_nav/feedback"
+  current_goal:   "/audit_nav/current_goal"
+  confidence:     "/audit_nav/confidence"
+  object_bbox:    "/audit_nav/object_bbox"
+  debug_image:    "/audit_nav/debug_image"
+  target_bbox_image: "/audit_nav/target_bbox_image"
+  eval_event:     "/audit_nav/eval_event"
+  # Internal VLM handshake
+  vlm_trigger:    "/vlm/trigger_audit"
+  vlm_complete:   "/vlm/audit_complete"
+
+# ---------------------------------------------------------------------------
+# Navigator (topo_nav_node)
+# ---------------------------------------------------------------------------
+navigator:
+  # Speed (m/s)
+  base_speed:       0.60
+  min_speed_floor:  0.35
+  rush_speed:       0.65
+  max_speed_cap:    0.85
+  # PID — DO NOT CHANGE without re-tuning
+  kp_speed:  1.0
+  ki_speed:  0.8
+  kd_speed:  0.1
+  kp_yaw:   50.0
+  kd_yaw:   15.0
+  max_rotation_speed: 2.5
+  # Lookahead (m)
+  min_lookahead: 0.4
+  max_lookahead: 0.8
+  # Arrival / stuck thresholds
+  arrival_dist:        0.30   # metres — goal reached when distance < this
+  stuck_vel_threshold: 0.08   # m/s  — below this counts as "stuck"
+  stuck_time_threshold: 1.5   # s    — stuck this long triggers recovery
+  blacklist_radius:    0.30   # m    — merge radius for unreachable blacklist
+  max_blacklist_size:  50
+  # Wall-back / recovery
+  wall_back_distance:  0.20   # m
+  wall_back_max_time:  1.0    # s
+  force_rush_speed:    5.0    # m/s (brief savage-rush escape)
+  # VL preemption
+  vl_preempt_min_conf: 0.50
+  vl_goal_snap_max_m:  1.2
+  vl_search_timeout:   30.0   # s — panoramic scan duration per node
+  vl_fail_cooldown_sec:  60.0
+  vl_ambig_cooldown_sec: 20.0
+  vl_preempt_near_node_m: 0.70
+  # Semantic hint scoring
+  semantic_hint_sigma_m:     2.5
+  semantic_hint_max_age_sec: 120.0
+  semantic_hint_min_conf:    0.30
+  # Final search
+  final_search_request_timeout: 90.0   # s — re-issue instruction after this
+
+# ---------------------------------------------------------------------------
+# A* Planner (astar_planner)
+# ---------------------------------------------------------------------------
+planner:
+  resolution:    0.05    # m/cell — must match map resolution
+  robot_radius:  0.15    # m
+  allow_unknown: true
+  gray_penalty:  5.0     # cost multiplier for unknown cells
+
+# ---------------------------------------------------------------------------
+# Topology Builder  (called inside topo_nav_node)
+# ---------------------------------------------------------------------------
+topology:
+  min_room_distance:  35     # px — minimum distance between room centres
+  prune_len:          20     # px — spur pruning threshold
+  max_cycle_len:      60     # px — small-cycle removal threshold
+  dbscan_eps:         15     # px — junction clustering radius
+
+# ---------------------------------------------------------------------------
+# Open-Vocab Perception (open_vocab_perception_node)
+# ---------------------------------------------------------------------------
+perception:
+  model_path: "yolov8l-world.pt"   # place in nodes/ or update this path
+  iou_track_threshold: 0.20
+  depth_scale:   1.0               # multiply raw depth values to get metres
+  goal_pub_rate_hz: 10.0
+
+# ---------------------------------------------------------------------------
+# Occupancy Map (occupancy_map_node)
+# ---------------------------------------------------------------------------
+mapper:
+  map_resolution: 0.05    # m/cell
+  map_width:      400     # cells
+  map_height:     400     # cells
+  publish_rate_hz: 2.0
+
+# ---------------------------------------------------------------------------
+# Semantic Memory (semantic_memory_node)
+# ---------------------------------------------------------------------------
+memory:
+  freeze_memory:  false   # true = static baseline (ablation)
+  log_prefix:    "ours"   # CSV experiment log prefix
+  reset_db:       false   # wipe ChromaDB on startup
+  max_retry:      3       # max navigation retries per query
+  panorama_angles: [0, 45, 90, 135, 180, 225, 270, 315]   # degrees
+
+# ---------------------------------------------------------------------------
+# Instruction Parser (instruction_parser_node)
+# ---------------------------------------------------------------------------
+commander:
+  llm_temperature: 0.1
+  llm_max_tokens:  100

@@ -1,0 +1,31 @@
+# AuditNav — Python dependencies
+# Tested on Ubuntu 22.04 + CUDA 11.8 + Python 3.10
+#
+# Install:
+#   pip install -r requirements.txt
+#
+# For GPU inference (recommended):
+#   pip install torch torchvision --index-url https://download.pytorch.org/whl/cu118
+
+# Core ML / Vision
+torch>=2.0.0
+torchvision>=0.15.0
+ultralytics>=8.0.200          # YOLO-World
+opencv-python>=4.8.0
+
+# Robotics geometry / planning
+numpy>=1.24.0
+scikit-image>=0.21.0          # medial_axis, peak_local_max
+scikit-learn>=1.3.0           # DBSCAN
+networkx>=3.1                 # topology graph
+
+# VLM / semantic memory
+chromadb>=0.4.15
+sentence-transformers>=2.3.0  # BGE-M3 embedding
+requests>=2.31.0
+
+# Config
+pyyaml>=6.0
+
+# Utilities
+huggingface_hub>=0.19.0       # for downloading BGE-M3

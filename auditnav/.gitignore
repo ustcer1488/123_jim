@@ -1,0 +1,28 @@
+# Runtime outputs
+data/
+
+# Model weights (too large for git)
+*.pt
+*.pth
+bge-m3/
+
+# Calibration (environment-specific)
+map_calibration.json
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# Logs
+*.log
+*.jsonl
