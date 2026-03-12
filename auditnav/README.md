@@ -1,7 +1,4 @@
-# AuditNav: Vision-Language Navigation with Semantic Topological Memory
-
-> Anonymous code submission for IROS review.  
-> *"AuditNav: Semantic Topological Memory for Open-Vocabulary Vision-Language Navigation"*
+> *AuditNav: VLM-Audited Hierarchical Embodied Navigation Framework with Dynamic Memory and Open-Vocabulary Adaptation*
 
 ---
 
@@ -378,13 +375,3 @@ ros2 run auditnav semantic_memory_node --log_prefix baseline_static
 → The mapper needs a few seconds to start. The launch file already adds a 6 s delay before the navigator; if your machine is slow, increase `period=6.0` in `launch/auditnav.launch.py`.
 
 ---
-
-## Citation
-
-```bibtex
-@inproceedings{auditnav2025,
-  title     = {AuditNav: Semantic Topological Memory for Open-Vocabulary Vision-Language Navigation},
-  booktitle = {Proceedings of the IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS)},
-  year      = {2025}
-}
-```
